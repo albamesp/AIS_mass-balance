@@ -1,70 +1,31 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+<html>
 
-.counties {
-  fill: none;
-}
+<head>
 
-.states {
-  fill: none;
-  stroke: #fff;
-  stroke-linejoin: round;
-}
+    <meta charset=utf-8 />
+    <title> Greenland - taking a look underneath</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 
-.q0-9 { fill:rgb(247,251,255); }
-.q1-9 { fill:rgb(222,235,247); }
-.q2-9 { fill:rgb(198,219,239); }
-.q3-9 { fill:rgb(158,202,225); }
-.q4-9 { fill:rgb(107,174,214); }
-.q5-9 { fill:rgb(66,146,198); }
-.q6-9 { fill:rgb(33,113,181); }
-.q7-9 { fill:rgb(8,81,156); }
-.q8-9 { fill:rgb(8,48,107); }
+    <!-- import mapbox -->
+    <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
 
-</style>
-<svg width="960" height="600"></svg>
-<script src="//d3js.org/d3.v4.min.js"></script>
-<script src="//d3js.org/topojson.v1.min.js"></script>
-<script>
+    <link type='text/css' href='css/main.css' rel='stylesheet' />
 
-var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+</head>
 
-var rateById = d3.map();
+<body>
 
-var quantize = d3.scaleQuantize()
-    .domain([0, 0.15])
-    .range(d3.range(9).map(function(i) { return "q" + i + "-9"; }));
+    <!-- import omnivore to help with csv input -->
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
 
-var projection = d3.geoAlbersUsa()
-    .scale(1280)
-    .translate([width / 2, height / 2]);
+    <!-- define section place holder for map -->
+    <div id='map'></div>
 
-var path = d3.geoPath()
-    .projection(projection);
+    <!-- call the main app code -->
+    <script src='js/basemap.js'></script>
 
-d3.queue()
-    .defer(d3.json, "/mbostock/raw/4090846/us.json")
-    .defer(d3.tsv, "unemployment.tsv", function(d) { rateById.set(d.id, +d.rate); })
-    .await(ready);
+</body>
 
-function ready(error, us) {
-  if (error) throw error;
-
-  svg.append("g")
-      .attr("class", "counties")
-    .selectAll("path")
-      .data(topojson.feature(us, us.objects.counties).features)
-    .enter().append("path")
-      .attr("class", function(d) { return quantize(rateById.get(d.id)); })
-      .attr("d", path);
-
-  svg.append("path")
-      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-      .attr("class", "states")
-      .attr("d", path);
-}
-
-</script>
+</html>
