@@ -1,0 +1,42 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+/* css to customize Leaflet default styles  */
+.custom .leaflet-popup-tip,
+.custom .leaflet-popup-content-wrapper {
+    background: #e93434;
+    color: #ffffff;
+}
+
+/*legend css: http://leafletjs.com/examples/choropleth.html*/
+.legend {
+    line-height: 18px;
+    color: #555;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+/* auto popup size: https://github.com/Leaflet/Leaflet/issues/724-*/
+/*.leaflet-popup-content {*/
+/*width:auto !important;*/
+/*}*/
+
+img {
+    width: 90%;
+    /*height: 30%;*/
+    
+    max-height: 300px;
+}
