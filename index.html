@@ -1,31 +1,69 @@
 <!DOCTYPE html>
-<html>
+<meta charset="utf-8">
+<style>
 
-<head>
+.graticule {
+  fill: none;
+  stroke: #777;
+  stroke-width: .5px;
+  stroke-opacity: .5;
+}
 
-    <meta charset=utf-8 />
-    <title> Greenland - taking a look underneath</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+.land {
+  fill: #222;
+}
 
-    <!-- import mapbox -->
-    <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
-    <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
+.boundary {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+}
 
-    <link type='text/css' href='css/main.css' rel='stylesheet' />
-
-</head>
-
+</style>
 <body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+<script>
 
-    <!-- import omnivore to help with csv input -->
-    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.2.0/leaflet-omnivore.min.js'></script>
+var width = 960,
+    height = 960;
 
-    <!-- define section place holder for map -->
-    <div id='map'></div>
+var projection = d3.geo.stereographic()
+    .scale(245)
+    .translate([width / 2, height / 2])
+    .rotate([-20, 0])
+    .clipAngle(180 - 1e-4)
+    .clipExtent([[0, 0], [width, height]])
+    .precision(.1);
 
-    <!-- call the main app code -->
-    <script src='js/basemap.js'></script>
+var path = d3.geo.path()
+    .projection(projection);
 
-</body>
+var graticule = d3.geo.graticule();
 
-</html>
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+svg.append("path")
+    .datum(graticule)
+    .attr("class", "graticule")
+    .attr("d", path);
+
+d3.json("/mbostock/raw/4090846/world-50m.json", function(error, world) {
+  if (error) throw error;
+
+  svg.insert("path", ".graticule")
+      .datum(topojson.feature(world, world.objects.land))
+      .attr("class", "land")
+      .attr("d", path);
+
+  svg.insert("path", ".graticule")
+      .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+      .attr("class", "boundary")
+      .attr("d", path);
+});
+
+d3.select(self.frameElement).style("height", height + "px");
+
+</script
