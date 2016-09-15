@@ -1,72 +1,60 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-.graticule {
-  fill: none;
-  stroke: #777;
-  stroke-width: .5px;
-  stroke-opacity: .5;
-}
-
-.land {
-  fill: #222;
-}
-
-.boundary {
-  fill: none;
-  stroke: #fff;
-  stroke-width: .5px;
-}
-
-</style>
-<body>
-<script src="//d3js.org/d3.v3.min.js"></script>
-<script src="//d3js.org/topojson.v1.min.js"></script>
- <!-- define section place holder for map -->
-    <div id='map'></div>
-
-<script>
-
-var width = 960,
-    height = 960;
-
-var projection = d3.geo.stereographic()
-    .scale(245)
-    .translate([width / 2, height / 2])
-    .rotate([-20, 0])
-    .clipAngle(180 - 1e-4)
-    .clipExtent([[0, 0], [width, height]])
-    .precision(.1);
-
-var path = d3.geo.path()
-    .projection(projection);
-
-var graticule = d3.geo.graticule();
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-svg.append("path")
-    .datum(graticule)
-    .attr("class", "graticule")
-    .attr("d", path);
-
-d3.json("/mbostock/raw/4090846/world-50m.json", function(error, world) {
-  if (error) throw error;
-
-  svg.insert("path", ".graticule")
-      .datum(topojson.feature(world, world.objects.land))
-      .attr("class", "land")
-      .attr("d", path);
-
-  svg.insert("path", ".graticule")
-      .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
-      .attr("class", "boundary")
-      .attr("d", path);
-});
-
-d3.select(self.frameElement).style("height", height + "px");
-
-</script
+<html>
+ <head>
+  <meta charset="utf-8" />
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/proj4js/1.1.0/proj4js-compressed.js"></script>
+  <style type="text/css">
+   html,body,#map{
+    height:100%;
+    width:100%;
+    margin:0px;
+    padding:0px;
+   }
+  </style>
+  <script>
+   function setupmap(){
+    Proj4js.defs["EPSG:3572"] = "+title=Alaska Albers +proj=laea +lat_0=90 +lon_0=-150 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+    var sourceProj = new OpenLayers.Projection("EPSG:4326");
+    var destProj = new OpenLayers.Projection("EPSG:3572");
+    var ginaLayer = new OpenLayers.Layer.WMS(
+     "GINA WMS",//layer label
+     "http://wms.alaskamapped.org/bdl/",
+     {
+      layers: 'BestDataAvailableLayer' //layer wms name
+     },
+     {
+      animationEnabled:true,
+      isBaseLayer:true,
+      transitionEffect: 'resize',
+      attribution: 'Best Data Layer provided by <a href="http://www.gina.alaska.edu">GINA</a>'
+     }
+     );
+    var extent = new OpenLayers.Bounds(-9036842.762,-9036842.762, 9036842.762, 9036842.762);
+    var map = new OpenLayers.Map('map',{
+     maxExtent:extent,
+     restrictedExtent:extent,
+     units:'m',
+     wrapDateLine:false,
+     projection:destProj
+    });
+    map.addLayer(ginaLayer);
+    var caribouLayer = new OpenLayers.Layer.WMS(
+     "Rangifer/caribou herd extent",
+     'http://pdx.axiomalaska.com/geoserver/wms',
+     {
+      layers:'axiom:CARMA_RangiferHerdExtent',
+      isBaseLayer:false,
+      transparent:true,
+      version:'1.1.1'
+     }
+    );
+    map.addLayer(caribouLayer);
+    map.setCenter(new OpenLayers.LonLat(-100,80),2);
+   }
+  </script>
+ </head>
+ <body onload="setupmap()">
+    <div id="map"></div>
+ </body>
+</html>
