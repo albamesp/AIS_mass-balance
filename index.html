@@ -74,6 +74,17 @@
       }
     );
     map.addLayer(antarcticLayer);
+var width = 960,
+    height = 960;
+
+var projection = d3.geo.stereographic()
+    .scale(245)
+    .translate([width / 2, height / 2])
+    .rotate([-20, 0])
+    .clipAngle(180 - 1e-4)
+    .clipExtent([[0, 0], [width, height]])
+    .precision(.1);
+
 var path = d3.geo.path()
     .projection(projection);
 
